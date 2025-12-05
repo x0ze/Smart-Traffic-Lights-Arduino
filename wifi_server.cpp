@@ -1,6 +1,7 @@
 #include "wifi_server.h"
 #include "parser.h"
 #include "settings.h"
+#include "send_http_response.h"
 #include <Arduino.h>
 
 #define SECRET_SSID "trafficSensor"
@@ -10,28 +11,6 @@ char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;       // Current WiFi status
 WiFiServer server(80);             // Web server on port 80
-bool isPost = false;               // Flag for POST request
-
-// HTML page served to clients
-String htmlResponse = R"HTML(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Traffic Lights</title>
-</head>
-<body>
-<h2>Enter values</h2>
-<form action="" method="post">
-<label for="distance">Distance [meters]:</label>
-<input type="number" id="distance" name="distance" value="100"><br>
-<label for="speed">Max. Speed [km/h]:</label>
-<input type="number" id="speed" name="speed" value="30"><br>
-<input type="submit" value="Submit">
-</form>
-</body>
-</html>
-)HTML";
 
 // Initialize WiFi and start server
 void initWiFiServer() {
@@ -54,54 +33,65 @@ void initWiFiServer() {
 
 // Handle HTTP clients
 void handleWebServer() {
-    WiFiClient client = server.available(); // Check for incoming client
-    if(!client) return;
+  WiFiClient client = server.available();   // listen for incoming clients
 
-    String currentLine = "";
-    while(client.connected()) {
-        delayMicroseconds(10); // Prevent overloading SPI
-        if(!client.available()) continue;
+  if (!client) {                            // if you no client, return
+    return;
+  }
 
-        char c = client.read();
-        Serial.write(c);
-
-        if(c != '\r' && c != '\n') {
-            currentLine += c; // Build line of HTTP request
-            continue;
-        }
-
-        if(c == '\r') continue;
-
-        // Detect POST request
-        if(currentLine.startsWith("POST /")) isPost = true;
-
-        // Handle GET request (send HTML page)
-        if(currentLine.length() == 0 && !isPost) {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
-            client.print(htmlResponse);
-            client.println();
-            break;
-        }
-
-        // End of POST headers
-        if(isPost && currentLine.length() == 0) {
-            isPost = false;
-            continue;
-        }
-
-        // Parse form for GET request
-        if(!isPost) {
-            parseForm(currentLine);
-            client.println(htmlResponse);
-            break;
-        }
-
-        currentLine = "";
+  Serial.println("New client");           // print a message out the serial port
+  String currentLine = "";                // make a String to hold incoming data from the client
+  bool nextLinePOSTBody = false;          // Reset nextLinePOSTBody variable
+  bool isPost = false;                    // Reset isPost variable
+  while (client.connected()) {            // loop while the client's connected
+    delayMicroseconds(10);                // This is required for the Arduino Nano RP2040 Connect - otherwise it will loop so fast that SPI will never be served.
+    if (!client.available()) {            // if there's no client, break out of the while loop
+      break;
+    }
+    char c = client.read();             // read a byte
+    Serial.write(c);                    // print it out to the serial monitor
+    if (c != '\r' && c != '\n') {       // if you have any character other than a carriage return or new line character,
+      currentLine += c;                 // add it to the end of the currentLine
+      continue;
     }
 
-    client.stop(); // Close connection
+    if (c == '\r') {
+      continue;
+    }
+
+    // The following code only executes when c == '\n'(newline character):
+
+    // Check if it was a post request
+    if (currentLine.startsWith("POST /")) {
+      isPost = true;
+    }
+
+    if (currentLine.length() == 0 && !isPost) {
+      // if the current line is blank, there are now two newline characters in a row.
+      // If it's not a POST request, that means it's the end of the client HTTP request, so send a response:
+      sendHTTPResponse(client);
+      break;
+    }
+
+    if (isPost && currentLine.length() == 0) {
+      // If we reach this point in the code, that means that we are at the end of the POST headers
+      // The next line will be the POST payload.
+      nextLinePOSTBody = true;
+      continue;
+    }
+
+    // clear currentLine since there's a new line
+    currentLine = "";
+  }
+
+  if (nextLinePOSTBody) {
+    parseForm(currentLine);
+    sendHTTPResponse(client);
+  }
+
+  // close the connection:
+  client.stop();
+  Serial.println("Client disconnected");
 }
 
 // Print WiFi AP info
