@@ -3,12 +3,14 @@
 #include "settings.h"
 #include "parser.h"
 #include "algo_dynamic.h"
+#include "send_http_response.h"
 
 const int pirPinLeft = 2;     // Left pin connected to PIR sensor
 const int pirPinRight = 7;     // Right pin connected to PIR sensor
 int statusLeft = 0;
 int statusRight = 0;
 unsigned long currentMillis;
+
 
 void setup() {
     Serial.begin(9600);
