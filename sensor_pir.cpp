@@ -3,13 +3,27 @@
 
 int pirStatus = 0;        // Current PIR state
 
+int distanceSensor;
+long duration;
+
 // Initialize PIR pin
-void initPIRSensor(int pirPin) {
-    pinMode(pirPin, INPUT);
+void initSensor(int trigPin, int echoPin) {
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
 }
 
 // Read PIR sensor state
-int readPIR(int pirPin) {
-    pirStatus = digitalRead(pirPin);
-    return pirStatus;
+int readSensor(int trigPin, int echoPin) {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    
+    duration = pulseIn(echoPin, HIGH);
+    
+    distanceSensor = duration * 0.034 / 2;
+
+    return distanceSensor;
 }

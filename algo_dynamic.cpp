@@ -1,39 +1,66 @@
 #include "traffic_light.h"
+#include "settings.h"
 #include <Arduino.h>
 
+enum TrafficState {
+  IDLE,
+  IN_PROGRESS
+};
+
+
+static TrafficState state = IDLE;
+static unsigned long greenEndTime = 0;
+static int activeSide = 0;  // 1 = left, 2 = right
+
 void start_dynamic(int statusLeft, int statusRight) {
+  unsigned long now = millis();
 
-  if (statusLeft == HIGH && statusRight == LOW /*&& roadFree*/) {
-    /*counter();*/
-    setGreen(13);
-    setRed(12);
-  }
- // Right sensor detects a car? 
-    // No car coming from the left at present (in the last x seconds)?
-        // Right lights green
-        // Left lights red
-  if (statusRight == HIGH && statusLeft == LOW /*&& roadFree*/) {
-    setGreen(12);
-    setRed(13);
-  }
- // Left sensor detects a car? 
-    // No car coming from the right at present (in the last x seconds)?
-        // Left lights green
-        // Right lights red
-}
+  // ---------------------------------------------------
+  // Dynamic calculation of transit time
+  // ---------------------------------------------------
+  float d = getDistance();      // meters
+  float v = getMaxSpeed();      // km/h
+  float speedMS = v * 0.27778;  // conversion km/h -> m/s
 
-void counter(const unsigned long maxTime, unsigned long currentMillis) {
-  unsigned long previousMillis = 0;
-  const long interval = 1000;  
-  unsigned long secondsCounter = 0;
-  bool roadFree = false;
+  if (speedMS < 0.1) speedMS = 0.1;  // avoid division by zero
+  float maxTime = d / speedMS;       // time in seconds
+  // ---------------------------------------------------
 
-  if (currentMillis - previousMillis >= interval && secondsCounter < maxTime) {
-    previousMillis = currentMillis;
-    secondsCounter++;
+  switch (state) {
 
-    if (secondsCounter == maxTime) {
-      roadFree = true;
-    }
+    case IDLE:
+      if (statusLeft == 1 && statusRight == 0) {
+        turnOffAll(2,3,4);
+        turnOffAll(5,6,7);
+        setGreen(4);  // left
+        setRed(6);    // right
+        activeSide = 1;
+        greenEndTime = now + (unsigned long)(maxTime * 1000UL);
+        state = IN_PROGRESS;
+        Serial.println("Left free - Right Closed");
+      } 
+      else if (statusRight == 1 && statusLeft == 0) {
+        turnOffAll(2,3,4);
+        turnOffAll(5,6,7);
+        setGreen(7);  // right
+        setRed(2);    // left
+        activeSide = 2;
+        greenEndTime = now + (unsigned long)(maxTime * 1000UL);
+        state = IN_PROGRESS;
+        Serial.println("Left closed - Right free");
+      }
+      break;
+
+    case IN_PROGRESS:
+      if (now >= greenEndTime) {
+        turnOffAll(2,3,4);
+        turnOffAll(5,6,7);
+        setRed(2);
+        setRed(6);
+        activeSide = 0;
+        state = IDLE;
+        Serial.println("Left closed - Right closed");
+      }
+      break;
   }
 }

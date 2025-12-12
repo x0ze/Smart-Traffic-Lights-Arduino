@@ -11,4 +11,7 @@ float getDistance();
 void setMaxSpeed(float s);
 float getMaxSpeed();
 
+
+float computeMaxTime();
+
 #endif

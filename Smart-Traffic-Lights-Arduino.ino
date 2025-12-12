@@ -5,26 +5,45 @@
 #include "algo_dynamic.h"
 #include "send_http_response.h"
 
-const int pirPinLeft = 2;     // Left pin connected to PIR sensor
-const int pirPinRight = 7;     // Right pin connected to PIR sensor
-int statusLeft = 0;
-int statusRight = 0;
-unsigned long currentMillis;
+const int trigPinLeft = 12;     // Left pin connected to sensor
+const int echoPinLeft = 9;     // Left pin connected to sensor
+const int trigPinRight = 11;    // Right pin connected to sensor
+const int echoPinRight = 10;     // Left pin connected to sensor
 
+int distanceLeft;
+int distanceRight;
 
 void setup() {
     Serial.begin(9600);
 
-    initWiFiServer();   // Initialize WiFi and web server
-    initPIRSensor(pirPinLeft);    // Initialize PIR motion sensor
-    initPIRSensor(pirPinRight);    // Initialize PIR motion sensor
+    initWiFiServer();           // Initialize WiFi + Web Server
+    initSensor(trigPinLeft,echoPinLeft);  // Left Sensor
+    initSensor(trigPinRight,echoPinRight); // Right Sensor
+    pinMode(4, OUTPUT);
+    pinMode(3, OUTPUT);
+    pinMode(2, OUTPUT);
+    pinMode(7, OUTPUT);
+    pinMode(6, OUTPUT);
 }
 
 void loop() {
-    currentMillis = millis();
+    // Read the Sensors
+    distanceLeft = readSensor(trigPinLeft, echoPinLeft);
+    distanceRight = readSensor(trigPinRight, echoPinRight);
+    int statusLeft = 0;
+    int statusRight = 0;
 
-    statusLeft = readPIR(pirPinLeft);          // Read PIR sensor state
-    statusRight = readPIR(pirPinRight);         // Read PIR sensor state
+    if (distanceLeft <= 10) {
+        statusLeft = 1;
+    }
+    if (statusRight <= 10) {
+        statusRight = 1;
+    }
+    // Dynamic traffic light management (automatic time calculation)
+    Serial.println(statusRight);
+    Serial.println(statusLeft);
     start_dynamic(statusLeft, statusRight);
-    handleWebServer();  // Handle HTTP clients and POST requests
+
+    // Manage HTTP requests (remote update + speed)
+    handleWebServer();
 }
