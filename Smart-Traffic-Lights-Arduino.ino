@@ -12,6 +12,8 @@ const int echoPinRight = 10;     // Left pin connected to sensor
 
 int distanceLeft;
 int distanceRight;
+bool carOnLeft;
+bool carOnRight;
 
 void setup() {
     Serial.begin(9600);
@@ -30,19 +32,20 @@ void loop() {
     // Read the Sensors
     distanceLeft = readSensor(trigPinLeft, echoPinLeft);
     distanceRight = readSensor(trigPinRight, echoPinRight);
-    int statusLeft = 0;
-    int statusRight = 0;
+    
+    carOnLeft = false;
+    carOnRight = false;
 
     if (distanceLeft <= 10) {
-        statusLeft = 1;
+        carOnLeft = 1;
     }
-    if (statusRight <= 10) {
-        statusRight = 1;
+    if (distanceRight <= 10) {
+        carOnRight = 1;
     }
     // Dynamic traffic light management (automatic time calculation)
-    Serial.println(statusRight);
-    Serial.println(statusLeft);
-    start_dynamic(statusLeft, statusRight);
+    Serial.println(carOnRight);
+    Serial.println(carOnLeft);
+    start_dynamic(carOnLeft, carOnRight);
 
     // Manage HTTP requests (remote update + speed)
     handleWebServer();

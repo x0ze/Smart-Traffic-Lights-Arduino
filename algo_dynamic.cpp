@@ -2,65 +2,68 @@
 #include "settings.h"
 #include <Arduino.h>
 
-enum TrafficState {
-  IDLE,
-  IN_PROGRESS
-};
+static unsigned long endTime = 0;
+static unsigned long minGreenEndTime = 0;
+int minGreenTime = 10 // seconds
 
+// ---------------------------------------------------
+// Dynamic calculation of transit time
+// ---------------------------------------------------
+float d = getDistance();      // meters
+float v = getMaxSpeed();      // km/h
+float speedMS = v / 3.6;  // conversion km/h -> m/s
+float timeToTravelDistance = d / speedMS;       // time in seconds
+// ---------------------------------------------------
 
-static TrafficState state = IDLE;
-static unsigned long greenEndTime = 0;
-static int activeSide = 0;  // 1 = left, 2 = right
+bool inProgress = false;
+bool rightSideGreen = false;
+bool leftSideGreen = false;
+String previousSide;
 
-void start_dynamic(int statusLeft, int statusRight) {
+void resetTimers() {
   unsigned long now = millis();
+  endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
+  minGreenEndTime = now + (unsigned long)(minGreenTime * 1000UL)
+}
 
-  // ---------------------------------------------------
-  // Dynamic calculation of transit time
-  // ---------------------------------------------------
-  float d = getDistance();      // meters
-  float v = getMaxSpeed();      // km/h
-  float speedMS = v * 0.27778;  // conversion km/h -> m/s
-
-  if (speedMS < 0.1) speedMS = 0.1;  // avoid division by zero
-  float maxTime = d / speedMS;       // time in seconds
-  // ---------------------------------------------------
-
-  switch (state) {
-
-    case IDLE:
-      if (statusLeft == 1 && statusRight == 0) {
-        turnOffAll(2,3,4);
-        turnOffAll(5,6,7);
-        setGreen(4);  // left
-        setRed(6);    // right
-        activeSide = 1;
-        greenEndTime = now + (unsigned long)(maxTime * 1000UL);
-        state = IN_PROGRESS;
-        Serial.println("Left free - Right Closed");
-      } 
-      else if (statusRight == 1 && statusLeft == 0) {
-        turnOffAll(2,3,4);
-        turnOffAll(5,6,7);
-        setGreen(7);  // right
-        setRed(2);    // left
-        activeSide = 2;
-        greenEndTime = now + (unsigned long)(maxTime * 1000UL);
-        state = IN_PROGRESS;
-        Serial.println("Left closed - Right free");
-      }
-      break;
-
-    case IN_PROGRESS:
-      if (now >= greenEndTime) {
-        turnOffAll(2,3,4);
-        turnOffAll(5,6,7);
-        setRed(2);
-        setRed(6);
-        activeSide = 0;
-        state = IDLE;
-        Serial.println("Left closed - Right closed");
-      }
-      break;
+void start_dynamic(bool carOnLeft, bool carOnRight) {
+  /* Temp, need to fix this block
+  if (carOnLeft && !leftSideGreen) {
+    turnOffAll(5,6,7);
+    setRed(6);    // left
   }
+
+  if (carOnRight == 0 && !rightSideGreen) {
+    turnOffAll(2,3,4);
+    setRed(2);    // right
+  }
+
+  if (carOnLeft && carOnRight) {
+    greenEndTime = now + greenLightCooldown;
+  }
+
+  if (carOnLeft && !inProgress) {
+    inProgress = true;
+    leftSideGreen = true;
+    turnOffAll(5,6,7);
+    setGreen(7);  // left
+    endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
+    Serial.println("Left free - Right Closed");
+  } 
+  
+  if (carOnRight && !inProgress) {
+    inProgress = true;
+    rightSideGreen = true;
+    turnOffAll(2,3,4);
+    setGreen(4);  // right
+    endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
+    greenEndTime = now + (unsigned long)(greenTimeCooldown * 1000UL);
+    Serial.println("Left closed - Right free");
+  }
+
+  if (inProgress && now >= endTime) {
+    Serial.println("Left closed - Right closed");
+    inProgress = false;
+  }  
+  */
 }
