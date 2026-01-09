@@ -1,9 +1,25 @@
 #ifndef TRAFFIC_LIGHT_H
 #define TRAFFIC_LIGHT_H
 
-void setRed(int redPin, int amberPin, int greenPin);
-void setRedAndAmber(int redPin, int amberPin, int greenPin);
-void setAmber(int redPin, int amberPin, int greenPin);
-void setGreen(int redPin, int amberPin, int greenPin);
+enum Side {
+  LEFT,
+  RIGHT
+};
+
+enum LightState {
+  RED,
+  RED_AND_AMBER,
+  AMBER,
+  GREEN
+};
+
+extern LightState leftLightState;
+extern LightState rightLightState;
+
+void initLight();
+void setRed(Side side);
+void setRedAndAmber(Side side);
+void setAmber(Side side);
+void setGreen(Side side);
 
 #endif

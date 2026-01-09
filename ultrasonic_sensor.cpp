@@ -33,6 +33,9 @@ float readSensor(int trigPin, int echoPin) {
 void updateSensorDistance() {
     float distanceLeft = readSensor(LEFT_TRIG_PIN, LEFT_ECHO_PIN);
     float distanceRight = readSensor(RIGHT_TRIG_PIN, RIGHT_ECHO_PIN);
-        
+    
+    Serial.println("Left distance: " + String(distanceLeft));
+    Serial.println("Right distance: " + String(distanceRight));
+
     updateLights(distanceLeft <= 10, distanceRight <= 10);
 }

@@ -9,22 +9,20 @@ const int LEFT_RED_PIN = 5;
 const int LEFT_AMBER_PIN = 6;
 const int LEFT_GREEN_PIN = 7;
 
-enum Side {
-    LEFT,
-    RIGHT
-};
-
-enum LightState {
-    RED,
-    RED_AND_AMBER,
-    AMBER,
-    GREEN
-};
-
 LightState leftLightState = GREEN;
 LightState rightLightState = RED;
 
-void setRed(enum Side side) {
+void initLight() {
+    pinMode(RIGHT_RED_PIN, OUTPUT);
+    pinMode(RIGHT_AMBER_PIN, OUTPUT);
+    pinMode(RIGHT_GREEN_PIN, OUTPUT);
+
+    pinMode(LEFT_RED_PIN, OUTPUT);
+    pinMode(LEFT_AMBER_PIN, OUTPUT);
+    pinMode(LEFT_GREEN_PIN, OUTPUT);
+}
+
+void setRed(Side side) {
     if (side == RIGHT) {
         digitalWrite(RIGHT_RED_PIN, HIGH);
         digitalWrite(RIGHT_AMBER_PIN, LOW);
@@ -38,7 +36,7 @@ void setRed(enum Side side) {
     }
 }
 
-void setRedAndAmber(enum Side side) {
+void setRedAndAmber(Side side) {
     if (side == RIGHT) {
         digitalWrite(RIGHT_RED_PIN, HIGH);
         digitalWrite(RIGHT_AMBER_PIN, HIGH);
@@ -52,7 +50,7 @@ void setRedAndAmber(enum Side side) {
     }
 }
 
-void setAmber(enum Side side) {
+void setAmber(Side side) {
     if (side == RIGHT) {
         digitalWrite(RIGHT_RED_PIN, LOW);
         digitalWrite(RIGHT_AMBER_PIN, HIGH);
@@ -66,7 +64,7 @@ void setAmber(enum Side side) {
     }
 }
 
-void setGreen(enum Side side) {
+void setGreen(Side side) {
     if (side == RIGHT) {
         digitalWrite(RIGHT_RED_PIN, LOW);
         digitalWrite(RIGHT_AMBER_PIN, LOW);
