@@ -7,21 +7,137 @@ void sendHTTPResponse(WiFiClient client) {
   String htmlResponse = R"HTML(
     <!DOCTYPE html>
     <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <title>Traffic Lights</title>
-    </head>
-    <body>
-      <h2>Enter values</h2>
-      <form action="" method="post">
-      <label for="distance">Distance [meters]:</label>
-      <input type="number" step="0.1" id="distance" name="distance" value=")HTML" + String(distance) + R"HTML("><br>
-      <label for="speed">Min. Speed [km/h]:</label>
-      <input type="number" step="0.1" id="speed" name="speed" value=")HTML" + String(minSpeed) + R"HTML("><br>
-      <input type="submit" value="Submit">
-      </form>
-    </body>
-    </html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Construction Traffic Lights Configuration</title>
+      
+        <style>
+          :root {
+            --yellow: #ffd500;
+            --dark: #2a2a2a;
+            --gray: #3a3a3a;
+            --light: #f9f9f9;
+          }
+      
+          * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+      
+          body {
+            margin: 0;
+            background-color: var(--dark);
+            color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+          }
+      
+          .container {
+            background-color: var(--gray);
+            padding: 26px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+            border-top: 6px solid var(--yellow);
+          }
+      
+          h2 {
+            margin-top: 0;
+            text-align: center;
+            color: var(--yellow);
+            font-size: 1.7em;
+            letter-spacing: 0.5px;
+          }
+      
+          label {
+            display: block;
+            margin-top: 20px;
+            font-size: 1.1em;
+          }
+      
+          .unit {
+            font-size: 0.9em;
+            opacity: 0.85;
+          }
+      
+          input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
+            font-size: 1.2em;
+            border-radius: 8px;
+            border: none;
+            background-color: #eaeaea;
+            color: #000;
+          }
+      
+          input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,213,0,0.6);
+          }
+      
+          input[type="submit"] {
+            margin-top: 30px;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background-color: var(--yellow);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+          }
+      
+          input[type="submit"]:hover {
+            background-color: #ffdf3a;
+          }
+      
+          input[type="submit"]:active {
+            transform: scale(0.98);
+          }
+      
+          footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 0.85em;
+            opacity: 0.7;
+          }
+        </style>
+      </head>
+      
+      <body>
+        <div class="container">
+          <h2>Traffic Lights Setup</h2>
+      
+          <form action="" method="post">
+            <label for="distance">
+              Section length
+              <span class="unit">(meters)</span>
+            </label>
+            <input type="number" step="10" min="0" id="distance" name="distance"
+                   value=")HTML" + String(distance) + R"HTML(">
+      
+            <label for="speed">
+              Minimum speed
+              <span class="unit">(km/h)</span>
+            </label>
+            <input type="number" step="5" min="0" id="speed" name="speed"
+                   value=")HTML" + String(minSpeed) + R"HTML(">
+      
+            <input type="submit" value="Apply configuration">
+          </form>
+      
+          <footer>
+            Dynamic construction traffic light system
+          </footer>
+        </div>
+      </body>
+      </html>
   )HTML";
 
   // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
