@@ -1,69 +1,16 @@
 #include "traffic_light.h"
-#include "settings.h"
+#include "form_data_parser.h"
 #include <Arduino.h>
 
 static unsigned long endTime = 0;
-static unsigned long minGreenEndTime = 0;
-int minGreenTime = 10 // seconds
+int minGreenTime = 10; // seconds
+static unsigned long minGreenEndTime = (unsigned long)(minGreenTime * 1000UL);
 
-// ---------------------------------------------------
-// Dynamic calculation of transit time
-// ---------------------------------------------------
-float d = getDistance();      // meters
-float v = getMaxSpeed();      // km/h
-float speedMS = v / 3.6;  // conversion km/h -> m/s
-float timeToTravelDistance = d / speedMS;       // time in seconds
-// ---------------------------------------------------
+float maxTimeToTravelDistance = distance / (minSpeed / 3.6); // need to convert speed from km/h to m/s because distance is in meters
 
-bool inProgress = false;
-bool rightSideGreen = false;
-bool leftSideGreen = false;
-String previousSide;
+bool last_green_side_was_left = true;
 
-void resetTimers() {
-  unsigned long now = millis();
-  endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
-  minGreenEndTime = now + (unsigned long)(minGreenTime * 1000UL)
-}
-
-void start_dynamic(bool carOnLeft, bool carOnRight) {
-  /* Temp, need to fix this block
-  if (carOnLeft && !leftSideGreen) {
-    turnOffAll(5,6,7);
-    setRed(6);    // left
-  }
-
-  if (carOnRight == 0 && !rightSideGreen) {
-    turnOffAll(2,3,4);
-    setRed(2);    // right
-  }
-
-  if (carOnLeft && carOnRight) {
-    greenEndTime = now + greenLightCooldown;
-  }
-
-  if (carOnLeft && !inProgress) {
-    inProgress = true;
-    leftSideGreen = true;
-    turnOffAll(5,6,7);
-    setGreen(7);  // left
-    endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
-    Serial.println("Left free - Right Closed");
-  } 
+void updateLights(bool carOnLeft, bool carOnRight) {
+  unsigned long elapsed = millis();
   
-  if (carOnRight && !inProgress) {
-    inProgress = true;
-    rightSideGreen = true;
-    turnOffAll(2,3,4);
-    setGreen(4);  // right
-    endTime = now + (unsigned long)(timeToTravelDistance * 1000UL);
-    greenEndTime = now + (unsigned long)(greenTimeCooldown * 1000UL);
-    Serial.println("Left closed - Right free");
-  }
-
-  if (inProgress && now >= endTime) {
-    Serial.println("Left closed - Right closed");
-    inProgress = false;
-  }  
-  */
 }

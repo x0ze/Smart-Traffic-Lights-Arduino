@@ -1,5 +1,5 @@
 #include "send_http_response.h"
-#include "settings.h"
+#include "form_data_parser.h"
 #include "wifi_server.h"
 #include <Arduino.h>
 
@@ -15,9 +15,9 @@ void sendHTTPResponse(WiFiClient client) {
       <h2>Enter values</h2>
       <form action="" method="post">
       <label for="distance">Distance [meters]:</label>
-      <input type="number" step="0.1" id="distance" name="distance" value=")HTML" + String(getDistance()) + R"HTML("><br>
-      <label for="speed">Max. Speed [km/h]:</label>
-      <input type="number" step="0.1" id="speed" name="speed" value=")HTML" + String(getMaxSpeed()) + R"HTML("><br>
+      <input type="number" step="0.1" id="distance" name="distance" value=")HTML" + String(distance) + R"HTML("><br>
+      <label for="speed">Min. Speed [km/h]:</label>
+      <input type="number" step="0.1" id="speed" name="speed" value=")HTML" + String(minSpeed) + R"HTML("><br>
       <input type="submit" value="Submit">
       </form>
     </body>

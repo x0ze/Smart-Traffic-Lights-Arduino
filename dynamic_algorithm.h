@@ -1,6 +1,6 @@
-#ifndef ALGO_DYNAMIC_H
-#define ALGO_DYNAMIC_H
+#ifndef DYNAMIC_ALGORITHM_H
+#define DYNAMIC_ALGORITHM_H
 
-void start_dynamic(int statusLeft, int statusRight);
+void updateLights(bool carOnLeft, bool carOnRight);
 
 #endif

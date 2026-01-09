@@ -1,7 +1,7 @@
-#ifndef SENSOR_PIR_H
-#define SENSOR_PIR_H
+#ifndef ULTRASONIC_SENSOR_H
+#define ULTRASONIC_SENSOR_H
 
 void initSensor(int trigPin, int echoPin);
-int readSensor(int trigPin, int echoPin);
+void updateSensorDistance();
 
 #endif

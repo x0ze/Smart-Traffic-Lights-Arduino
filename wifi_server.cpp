@@ -1,6 +1,5 @@
 #include "wifi_server.h"
-#include "parser.h"
-#include "settings.h"
+#include "form_data_parser.h"
 #include "send_http_response.h"
 #include <Arduino.h>
 
@@ -13,7 +12,7 @@ int status = WL_IDLE_STATUS;       // Current WiFi status
 WiFiServer server(80);             // Web server on port 80
 
 // Initialize WiFi and start server
-void initWiFiServer() {
+void initWiFiAP() {
     Serial.println("Access Point Web Server");
 
     // Optional: set static IP

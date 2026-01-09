@@ -3,7 +3,7 @@
 
 #include <WiFiS3.h>
 
-void initWiFiServer();
+void initWiFiAP();
 void handleWebServer();
 void printWiFiStatus();
 

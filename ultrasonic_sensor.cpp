@@ -1,19 +1,22 @@
-#include "sensor_pir.h"
+#include "ultrasonic_sensor.h"
+#include "dynamic_algorithm.h"
 #include <Arduino.h>
 
-int pirStatus = 0;        // Current PIR state
+const float SPEED_OF_SOUND = 0.034;
+const int LEFT_TRIG_PIN = 12;     // Left pin connected to sensor
+const int LEFT_ECHO_PIN = 9;     // Left pin connected to sensor
+const int RIGHT_TRIG_PIN = 11;    // Right pin connected to sensor
+const int RIGHT_ECHO_PIN = 10;     // Left pin connected to sensor
 
-int distanceSensor;
-long duration;
-
-// Initialize PIR pin
-void initSensor(int trigPin, int echoPin) {
-    pinMode(trigPin, OUTPUT);
-    pinMode(echoPin, INPUT);
+void initSensor() {
+    pinMode(LEFT_TRIG_PIN, OUTPUT);
+    pinMode(LEFT_ECHO_PIN, INPUT);
+    pinMode(RIGHT_TRIG_PIN, OUTPUT);
+    pinMode(RIGHT_ECHO_PIN, INPUT);
 }
 
 // Read PIR sensor state
-int readSensor(int trigPin, int echoPin) {
+float readSensor(int trigPin, int echoPin) {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     
@@ -21,9 +24,15 @@ int readSensor(int trigPin, int echoPin) {
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
     
-    duration = pulseIn(echoPin, HIGH);
-    
-    distanceSensor = duration * 0.034 / 2;
+    float duration = pulseIn(echoPin, HIGH);
+    float distance = duration * SPEED_OF_SOUND / 2;
 
-    return distanceSensor;
+    return distance;
+}
+
+void updateSensorDistance() {
+    float distanceLeft = readSensor(LEFT_TRIG_PIN, LEFT_ECHO_PIN);
+    float distanceRight = readSensor(RIGHT_TRIG_PIN, RIGHT_ECHO_PIN);
+        
+    updateLights(distanceLeft <= 10, distanceRight <= 10);
 }
